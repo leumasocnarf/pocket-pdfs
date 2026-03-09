@@ -10,7 +10,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "pdf_files")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
