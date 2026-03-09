@@ -20,7 +20,7 @@ public class PdfFile {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, length = 512)
+    @Column(name = "file_name", nullable = false, length = 512)
     private String filename;
 
     @Column(name = "s3_key", nullable = false, unique = true, length = 1024)
