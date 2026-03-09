@@ -72,8 +72,9 @@ class JwtFilterTest {
         SecurityContextHolder.clearContext();
     }
 
-    @ParameterizedTest(name = "extractToken should return null for invalid header: [{0}]")
+    @ParameterizedTest(name = "extractToken should return null for invalid header: [{0}] is invalid")
     @MethodSource("invalidAuthHeaderProvider")
+    @DisplayName("extractToken should return null for invalid header")
     void testExtractTokenWithInvalidHeaderShouldReturnNull(String header) {
         when(request.getHeader("Authorization")).thenReturn(header);
         assertNull(jwtFilter.extractToken(request));

@@ -38,8 +38,9 @@ class JwtProviderTest {
         assertDoesNotThrow(() -> jwtProvider.validateSecret());
     }
 
-    @ParameterizedTest(name = "validateSecret should throw for short secret: [{0}]")
+    @ParameterizedTest(name = "validateSecret should throw for short secret: [{0}] is a short secret")
     @MethodSource("shortSecretProvider")
+    @DisplayName("validateSecret should throw for short secret")
     void testValidateSecretWithShortSecretShouldThrow(String shortSecret) throws Exception {
         setField(jwtProvider, "jwtSecret", shortSecret);
         assertThrows(IllegalStateException.class, () -> jwtProvider.validateSecret());
@@ -55,10 +56,27 @@ class JwtProviderTest {
 
     @ParameterizedTest(name = "generateToken should return non-blank token for username: [{0}]")
     @MethodSource("usernameProvider")
+    @DisplayName("generateToken should return non-blank token")
     void testGenerateTokenWithValidUsernameShouldReturnNonBlankToken(String username) {
         String token = jwtProvider.generateToken(username);
         assertNotNull(token);
         assertFalse(token.isBlank());
+    }
+
+    @ParameterizedTest(name = "extractUsername should return [{0}] from generated token")
+    @MethodSource("usernameProvider")
+    @DisplayName("extractUsername should return")
+    void testExtractUsernameWithValidTokenShouldReturnCorrectUsername(String username) {
+        String token = jwtProvider.generateToken(username);
+        assertEquals(username, jwtProvider.extractUsername(token));
+    }
+
+    @ParameterizedTest(name = "isTokenValid should return true for valid token with username: [{0}]")
+    @MethodSource("usernameProvider")
+    @DisplayName("isTokenValid should return true for valid token")
+    void testIsTokenValidWithValidTokenShouldReturnTrue(String username) {
+        String token = jwtProvider.generateToken(username);
+        assertTrue(jwtProvider.isTokenValid(token));
     }
 
     static Stream<Arguments> usernameProvider() {
@@ -69,20 +87,6 @@ class JwtProviderTest {
         );
     }
 
-    @ParameterizedTest(name = "extractUsername should return [{0}] from generated token")
-    @MethodSource("usernameProvider")
-    void testExtractUsernameWithValidTokenShouldReturnCorrectUsername(String username) {
-        String token = jwtProvider.generateToken(username);
-        assertEquals(username, jwtProvider.extractUsername(token));
-    }
-
-    @ParameterizedTest(name = "isTokenValid should return true for valid token with username: [{0}]")
-    @MethodSource("usernameProvider")
-    void testIsTokenValidWithValidTokenShouldReturnTrue(String username) {
-        String token = jwtProvider.generateToken(username);
-        assertTrue(jwtProvider.isTokenValid(token));
-    }
-
     @Test
     @DisplayName("isTokenValid should return false for an expired token")
     void testIsTokenValidWithExpiredTokenShouldReturnFalse() throws Exception {
@@ -91,8 +95,9 @@ class JwtProviderTest {
         assertFalse(jwtProvider.isTokenValid(expiredToken));
     }
 
-    @ParameterizedTest(name = "isTokenValid should return false for malformed token: [{0}]")
+    @ParameterizedTest(name = "isTokenValid should return false for malformed token: [{0}] is a malformed token")
     @MethodSource("malformedTokenProvider")
+    @DisplayName("isTokenValid should return false for malformed token")
     void testIsTokenValidWithMalformedTokenShouldReturnFalse(String malformedToken) {
         assertFalse(jwtProvider.isTokenValid(malformedToken));
     }

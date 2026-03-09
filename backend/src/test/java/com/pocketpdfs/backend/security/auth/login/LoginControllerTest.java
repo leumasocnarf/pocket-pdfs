@@ -81,8 +81,9 @@ class LoginControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    @ParameterizedTest(name = "POST /auth/login should return 400 for invalid request: [{0}]")
+    @ParameterizedTest(name = "POST /auth/login should return 400 for invalid request: [{0}] is an invalid request")
     @MethodSource("invalidRequestProvider")
+    @DisplayName("POST /auth/login should return 400 for invalid request")
     void testLoginWithInvalidRequestShouldReturn400(String username, String password) throws Exception {
         LoginRequest request = new LoginRequest(username, password);
 

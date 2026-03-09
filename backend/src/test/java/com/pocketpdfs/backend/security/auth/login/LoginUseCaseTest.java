@@ -63,8 +63,9 @@ class LoginUseCaseTest {
         );
     }
 
-    @ParameterizedTest(name = "login should throw BadCredentialsException for invalid credentials: [{0}]")
+    @ParameterizedTest(name = "login should throw BadCredentialsException for invalid credentials: [{0}] is an invalid credential")
     @MethodSource("invalidCredentialsProvider")
+    @DisplayName("login should throw BadCredentialsException for invalid credentials")
     void testLoginWithInvalidCredentialsShouldThrowBadCredentialsException(String username, String password) {
         LoginRequest request = new LoginRequest(username, password);
 
