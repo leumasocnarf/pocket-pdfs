@@ -1,5 +1,6 @@
 package com.pocketpdfs.backend.common;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -9,6 +10,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.util.stream.Collectors;
 
@@ -61,5 +63,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                 .body(ErrorResponse.of(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Content type must be application/json"));
+    }
+
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException e) {
+        String message = e.getConstraintViolations().stream()
+                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                .collect(Collectors.joining(", "));
+        return ResponseEntity
+                .badRequest()
+                .body(ErrorResponse.of(HttpStatus.BAD_REQUEST, message));
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ErrorResponse> handleMissingPart(MissingServletRequestPartException e) {
+        return ResponseEntity
+                .badRequest()
+                .body(ErrorResponse.of(HttpStatus.BAD_REQUEST,
+                        "Required part '" + e.getRequestPartName() + "' is missing"));
     }
 }
