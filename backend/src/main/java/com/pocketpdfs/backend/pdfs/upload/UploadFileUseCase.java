@@ -36,6 +36,12 @@ public class UploadFileUseCase {
                 .contentType(file.getContentType())
                 .build();
 
+        /* TODO: fix it later
+            this returns: {"id":"78f933fe-34f2-4492-ba7b-a115055e4a4c",
+                "filename":"print-2-tela-expo.pdf",
+                "size":447949,"contentType":"application/pdf",
+                "uploadedAt":null}%
+         */
         PdfFile saved = repository.save(pdfFile);
         log.info("Uploaded file: id={}, filename={}", saved.getId(), saved.getFilename());
 
