@@ -1,6 +1,7 @@
 package com.pocketpdfs.backend.security;
 
 import com.pocketpdfs.backend.security.auth.JwtFilter;
+import com.pocketpdfs.backend.security.auth.JwtProvider;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +28,7 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    private final JwtFilter jwtFilter;
+    private final JwtProvider jwtProvider;
 
     @Value("${app.admin.username}")
     private String adminUsername;
@@ -61,6 +62,11 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    public JwtFilter jwtFilter() {
+        return new JwtFilter(jwtProvider, userDetailsService());
+    }
+
+    @Bean
     public AuthenticationManager authenticationManager(PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService());
         provider.setPasswordEncoder(passwordEncoder);
@@ -77,7 +83,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/auth/login").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
