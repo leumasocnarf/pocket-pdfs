@@ -19,7 +19,7 @@ public class UploadFileController {
 
     private final UploadFileUseCase uploadUseCase;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public FileResponse upload(@RequestParam("file") @NotNull MultipartFile file) throws IOException {
         return uploadUseCase.uploadFile(file);

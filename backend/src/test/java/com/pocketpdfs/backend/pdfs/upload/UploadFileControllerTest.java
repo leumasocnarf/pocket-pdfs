@@ -42,7 +42,7 @@ class UploadFileControllerTest {
 
         when(uploadUseCase.uploadFile(any())).thenReturn(response);
 
-        mockMvc.perform(multipart("/api/files").file(file))
+        mockMvc.perform(multipart("/api/files/upload").file(file))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.filename").value("test.pdf"))
                 .andExpect(jsonPath("$.size").value(1024))
@@ -51,7 +51,7 @@ class UploadFileControllerTest {
 
     @Test
     void uploadPartIsMissing() throws Exception {
-        mockMvc.perform(multipart("/api/files"))
+        mockMvc.perform(multipart("/api/files/upload"))
                 .andExpect(status().isBadRequest());
     }
 }

@@ -37,7 +37,7 @@ class PreviewFileControllerTest {
 
         when(previewFileUseCase.previewFile(id)).thenReturn(response);
 
-        mockMvc.perform(get("/api/files/{id}/previewFile", id))
+        mockMvc.perform(get("/api/files/{id}/preview", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andExpect(jsonPath("$.filename").value("test.pdf"))
