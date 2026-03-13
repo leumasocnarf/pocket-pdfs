@@ -13,7 +13,7 @@ public class PreviewFileController {
 
     private final PreviewFileUseCase previewFileUseCase;
 
-    @GetMapping("/{id}/previewFile")
+    @GetMapping("/{id}/preview")
     public UrlResponse preview(@PathVariable UUID id) {
         return previewFileUseCase.previewFile(id);
     }
