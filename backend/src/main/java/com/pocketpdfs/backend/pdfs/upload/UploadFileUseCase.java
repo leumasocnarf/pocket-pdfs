@@ -12,9 +12,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@Slf4j
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UploadFileUseCase {
 
     private static final long MAX_FILE_SIZE = 50L * 1024 * 1024; // 50MB
@@ -27,6 +28,7 @@ public class UploadFileUseCase {
     public FileResponse uploadFile(MultipartFile file) throws IOException {
         validate(file);
 
+        log.info("Uploading file: filename={}, size={}", file.getOriginalFilename(), file.getSize());
         String s3Key = storageService.uploadFile(file);
 
         PdfFile pdfFile = PdfFile.builder()
@@ -36,14 +38,8 @@ public class UploadFileUseCase {
                 .contentType(file.getContentType())
                 .build();
 
-        /* TODO: fix it later
-            this returns: {"id":"78f933fe-34f2-4492-ba7b-a115055e4a4c",
-                "filename":"print-2-tela-expo.pdf",
-                "size":447949,"contentType":"application/pdf",
-                "uploadedAt":null}%
-         */
         PdfFile saved = repository.save(pdfFile);
-        log.info("Uploaded file: id={}, filename={}", saved.getId(), saved.getFilename());
+        log.info("Uploaded file: id={}, filename={}, uploadedAt={}", saved.getId(), saved.getFilename(), saved.getUploadedAt());
 
         return FileResponse.from(saved);
     }
