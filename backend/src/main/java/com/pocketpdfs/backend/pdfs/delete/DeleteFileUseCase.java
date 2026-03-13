@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DeleteFileUseCase {
 
     private final IPdfFilesRepository repository;
@@ -24,6 +24,7 @@ public class DeleteFileUseCase {
         PdfFile file = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
 
+        log.info("Deleting file: id={}, s3Key={}", id, file.getS3Key());
         storageService.deleteFile(file.getS3Key());
         repository.delete(file);
 
