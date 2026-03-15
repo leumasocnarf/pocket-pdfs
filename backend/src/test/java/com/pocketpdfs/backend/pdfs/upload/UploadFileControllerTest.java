@@ -38,7 +38,7 @@ class UploadFileControllerTest {
                 "file", "test.pdf", "application/pdf", new byte[1024]);
 
         FileResponse response = new FileResponse(
-                UUID.randomUUID(), "test.pdf", 1024L, "application/pdf", Instant.now());
+                UUID.randomUUID(), "test.pdf", 1024L, "application/pdf", Instant.now().toString());
 
         when(uploadUseCase.uploadFile(any())).thenReturn(response);
 

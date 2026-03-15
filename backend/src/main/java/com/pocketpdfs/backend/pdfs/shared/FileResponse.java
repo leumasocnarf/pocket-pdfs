@@ -2,7 +2,6 @@ package com.pocketpdfs.backend.pdfs.shared;
 
 import com.pocketpdfs.backend.pdfs.PdfFile;
 
-import java.time.Instant;
 import java.util.UUID;
 
 public record FileResponse(
@@ -10,7 +9,7 @@ public record FileResponse(
         String filename,
         Long size,
         String contentType,
-        Instant uploadedAt
+        String uploadedAt
 ) {
     public static FileResponse from(PdfFile file) {
         return new FileResponse(
@@ -18,7 +17,7 @@ public record FileResponse(
                 file.getFilename(),
                 file.getSize(),
                 file.getContentType(),
-                file.getUploadedAt()
+                file.getUploadedAt().toString()
         );
     }
 }
