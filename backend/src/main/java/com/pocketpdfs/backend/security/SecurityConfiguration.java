@@ -40,7 +40,7 @@ public class SecurityConfiguration {
     @Value("${app.admin.password}")
     private String adminPassword;
 
-    @Value("${FRONTEND_URL:http://localhost:5173}")
+    @Value("${FRONTEND_URL:http://localhost:3000}")
     private String frontendUrl;
 
     @PostConstruct
