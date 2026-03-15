@@ -49,6 +49,6 @@ class PreviewFileControllerTest {
         UUID id = UUID.randomUUID();
         when(previewFileUseCase.previewFile(id)).thenThrow(new ResourceNotFoundException(id));
 
-        mockMvc.perform(get("/api/files/{id}/previewFile", id));
+        mockMvc.perform(get("/api/files/{id}/preview", id));
     }
 }

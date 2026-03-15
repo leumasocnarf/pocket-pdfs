@@ -110,7 +110,7 @@ class UploadFileUseCaseTest {
 
         when(storageService.uploadFile(file)).thenThrow(new IOException("S3 unavailable"));
 
-        assertThrows(IOException.class, () -> uploadUseCase.uploadFile(file));
+        assertThrows(FileStorageException.class, () -> uploadUseCase.uploadFile(file));
         verifyNoInteractions(repository);
     }
 }

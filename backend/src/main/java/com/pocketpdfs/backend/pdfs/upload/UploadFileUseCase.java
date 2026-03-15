@@ -26,11 +26,17 @@ public class UploadFileUseCase {
     private final StorageService storageService;
 
     @Transactional
-    public FileResponse uploadFile(MultipartFile file) throws IOException {
+    public FileResponse uploadFile(MultipartFile file) {
         validate(file);
 
         log.info("Uploading file: filename={}, size={}", file.getOriginalFilename(), file.getSize());
-        String s3Key = storageService.uploadFile(file);
+        String s3Key;
+        try {
+            s3Key = storageService.uploadFile(file);
+        } catch (IOException e) {
+            log.error("Failed to upload file to S3: filename={}", file.getOriginalFilename(), e);
+            throw new FileStorageException("Failed to upload file to storage", e);
+        }
 
         PdfFile pdfFile = PdfFile.builder()
                 .filename(file.getOriginalFilename())
