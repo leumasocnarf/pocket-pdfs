@@ -1,0 +1,52 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+  app:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+      - db-network
+
+  postgres:
+    image: "postgres:18-alpine"
+    container_name: "db-pockets-pdf"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: "mydatabase"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_USER: "${DB_USERNAME}"
+    volumes:
+      - "pocket_pdfs_data:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d mydatabase"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - db-network
+
+volumes:
+  pocket_pdfs_data:
+
+networks:
+  app-network:
+    driver: bridge
+  db-network:
+    driver: bridge
