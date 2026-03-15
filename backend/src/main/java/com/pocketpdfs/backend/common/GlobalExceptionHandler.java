@@ -2,8 +2,7 @@ package com.pocketpdfs.backend.common;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
@@ -70,7 +69,7 @@ public class GlobalExceptionHandler {
         log.warn("Unsupported media type: {}", e.getContentType());
         return ResponseEntity
                 .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-                .body(ErrorResponse.of(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Content type must be application/json"));
+                .body(ErrorResponse.of(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Content type must be multipart/form-data"));
     }
 
 
