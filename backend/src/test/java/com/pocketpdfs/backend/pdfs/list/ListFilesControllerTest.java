@@ -34,8 +34,8 @@ class ListFilesControllerTest {
     @Test
     void listShouldReturn200WithFileListWhenFilesExist() throws Exception {
         List<FileResponse> responses = List.of(
-                new FileResponse(UUID.randomUUID(), "first.pdf", 512L, "application/pdf", Instant.now()),
-                new FileResponse(UUID.randomUUID(), "second.pdf", 2048L, "application/pdf", Instant.now())
+                new FileResponse(UUID.randomUUID(), "first.pdf", 512L, "application/pdf", Instant.now().toString()),
+                new FileResponse(UUID.randomUUID(), "second.pdf", 2048L, "application/pdf", Instant.now().toString())
         );
 
         when(listFilesUseCase.listFiles()).thenReturn(responses);

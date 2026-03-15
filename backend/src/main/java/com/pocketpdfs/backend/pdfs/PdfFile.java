@@ -2,7 +2,6 @@ package com.pocketpdfs.backend.pdfs;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -31,7 +30,6 @@ public class PdfFile {
     @Column(name = "content_type", nullable = false, length = 128)
     private String contentType;
 
-    @CreationTimestamp
     @Column(name = "uploaded_at", nullable = false, updatable = false)
     private Instant uploadedAt;
 }
