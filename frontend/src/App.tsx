@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import Login from "./pages/Login.tsx";
 import { getToken } from "./stores/token.store.ts";
+import Dashboard from "./pages/Dashboard.tsx";
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -19,13 +20,7 @@ export default function App() {
           path="/"
           element={
             <PrivateRoute>
-              <div className="dashboard-placeholder">
-                <h1>Welcome to Pockets PDF</h1>
-                <p>
-                  This is a placeholder for the dashboard. More features coming
-                  soon!
-                </p>
-              </div>
+              <Dashboard />
             </PrivateRoute>
           }
         />

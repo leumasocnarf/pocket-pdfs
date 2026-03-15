@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { http, HttpResponse } from "msw";
 import { server } from "../test/msw-server";
 import { getToken, clearToken } from "../stores/token.store";
@@ -9,18 +9,25 @@ vi.mock("../stores/token.store", () => ({
   clearToken: vi.fn(),
 }));
 
-const pathname = () => new URL(window.location.href).pathname;
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.stubGlobal("location", {
+    href: "http://localhost/",
+    origin: "http://localhost",
+    pathname: "/",
+  });
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+const pathname = () => new URL(window.location.href, "http://localhost").pathname;
 
 describe("api interceptors", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    window.location.href = "/";
-  });
-
   describe("request interceptor", () => {
     it("attaches Authorization header when token exists", async () => {
       vi.mocked(getToken).mockReturnValue("test-token");
-
       let authHeader: string | null = null;
       server.use(
         http.get("/api/ping", ({ request }) => {
@@ -35,7 +42,6 @@ describe("api interceptors", () => {
 
     it("omits Authorization header when no token", async () => {
       vi.mocked(getToken).mockReturnValue(null);
-
       let authHeader: string | null = null;
       server.use(
         http.get("/api/ping", ({ request }) => {
