@@ -1,0 +1,45 @@
+.file-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.15s ease;
+}
+
+.file-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.file-card-icon {
+  font-size: 1.75rem;
+  flex-shrink: 0;
+}
+
+.file-card-info {
+  flex: 1;
+  min-width: 0; /* allows text truncation */
+}
+
+.file-card-name {
+  font-weight: 500;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-card-meta {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-top: 0.2rem;
+}
+
+.file-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}

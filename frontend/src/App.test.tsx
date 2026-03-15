@@ -1,13 +1,12 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router";
+import { getToken } from "./stores/token.store";
 import { PrivateRoute } from "./App";
 
 vi.mock("./stores/token.store", () => ({
   getToken: vi.fn(),
 }));
-
-import { getToken } from "./stores/token.store";
 
 describe("PrivateRoute", () => {
   it("renders children when token exists", () => {
