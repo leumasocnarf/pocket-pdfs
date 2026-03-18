@@ -27,6 +27,9 @@ WORKDIR /app
 # Copia o jar compilado do estágio de compilação
 COPY --from=builder /build/build/libs/*.jar app.jar
 
+# Install wget before switching to non-root user
+RUN apk add --no-cache wget
+
 # Cria um usuário e grupo não-root para executar a aplicação com menor privilégio
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
@@ -35,4 +38,4 @@ USER spring:spring
 EXPOSE 8080
 
 # Inicia a aplicação
-ENTRYPOINT ["java", "--enable-native-access=ALL-UNNAMED", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

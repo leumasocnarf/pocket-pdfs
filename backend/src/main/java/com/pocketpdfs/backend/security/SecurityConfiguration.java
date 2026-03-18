@@ -105,7 +105,7 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsFilter()))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers( "/api-docs/**", "/swagger-ui/**").permitAll() // TODO: add OpenAPI docs later
+                                .requestMatchers("/actuator/health").permitAll()
                                 .requestMatchers("/auth/login").permitAll()
                                 .anyRequest().authenticated()
                 )
