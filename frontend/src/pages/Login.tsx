@@ -35,7 +35,7 @@ export default function Login() {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1 className="login-title">PDF Vault</h1>
+        <h1 className="login-title">Pocket PDFs</h1>
         <p className="login-subtitle">Sign in to access your files</p>
 
         <form onSubmit={handleSubmit} className="login-form">

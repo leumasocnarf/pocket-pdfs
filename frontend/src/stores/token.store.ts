@@ -1,4 +1,4 @@
-const TOKEN_KEY = "pocket_pdfs_vault_token";
+const TOKEN_KEY = "pocket_pdfs_token";
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);

@@ -1,41 +1,41 @@
 # syntax=docker/dockerfile:1
 ARG JAVA_VERSION=25
 
-# Estágio de compilação
+# Build stage
 FROM eclipse-temurin:$JAVA_VERSION-jdk-alpine AS builder
 WORKDIR /build
 
-# Copia os arquivos do gradle
+# Copy gradle files
 COPY gradlew .
 COPY gradle/ gradle/
 COPY build.gradle .
 COPY settings.gradle .
 
-# Baixa dependências antes de copiar o código fonte (camada cacheável)
+# Download dependencies before copying source code (cacheable layer)
 RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
 
-# Copia o código fonte da aplicação
+# Copy application source code
 COPY src/ src/
 
-# Compila a aplicação e pula testes
+# Compile the application and skip tests
 RUN ./gradlew clean build -x test -x testClasses --no-daemon
 
-# Estágio de execução
+# Run stage
 FROM eclipse-temurin:$JAVA_VERSION-jre-alpine
 WORKDIR /app
 
-# Copia o jar compilado do estágio de compilação
+# Copy the compiled jar from the build stage
 COPY --from=builder /build/build/libs/*.jar app.jar
 
 # Install wget before switching to non-root user
 RUN apk add --no-cache wget
 
-# Cria um usuário e grupo não-root para executar a aplicação com menor privilégio
+# Create a non-root user and group to run the application with least privilege
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 
-# Expõe a porta padrão do Spring Boot
+# Expose the default Spring Boot port
 EXPOSE 8080
 
-# Inicia a aplicação
+# Start the application
 ENTRYPOINT ["java", "-jar", "app.jar"]

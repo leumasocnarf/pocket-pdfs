@@ -28,12 +28,15 @@ public class S3Service implements StorageService {
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
+    @Value("${aws.s3.prefix}")
+    private String s3Prefix;
+
 
     private String generateS3Key(String originalFilename) {
         String sanitized = originalFilename != null
                 ? originalFilename.replaceAll("[^a-zA-Z0-9._-]", "_")
                 : "file.pdf";
-        return "pdfs/" + UUID.randomUUID() + "_" + sanitized;
+        return s3Prefix + UUID.randomUUID() + "_" + sanitized;
     }
 
     @Override

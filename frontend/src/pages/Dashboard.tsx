@@ -55,7 +55,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>PDF Vault</h1>
+        <h1>Pocket PDFs</h1>
         <div className="header-actions">
           <button
             className="btn btn-primary"

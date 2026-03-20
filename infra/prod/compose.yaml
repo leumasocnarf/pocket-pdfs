@@ -1,7 +1,8 @@
 services:
-  postgres:
+  postgres-prod:
     image: "postgres:18-alpine"
-    container_name: "db-pockets-pdf"
+    container_name: "pocket-pdfs-prod-db"
+    restart: unless-stopped
     env_file:
       - .env
     environment:
@@ -9,7 +10,7 @@ services:
       POSTGRES_PASSWORD: "${DB_PASSWORD}"
       POSTGRES_USER: "${DB_USERNAME}"
     volumes:
-      - "pocket_pdfs_data:/var/lib/postgresql/data"
+      - "pocket_pdfs_prod_data:/var/lib/postgresql/data"
     ports:
       - "5432:5432"
     healthcheck:
@@ -18,16 +19,20 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - db-network
+      - prod-db-network
 
-  app:
-    build: ./backend
+  app-prod:
+    build: ../../backend
+    container_name: "pocket-pdfs-prod-app"
+    restart: unless-stopped
     ports:
       - "8080:8080"
     env_file:
       - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: "prod"
     depends_on:
-      postgres:
+      postgres-prod:
         condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1" ]
@@ -36,24 +41,28 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - app-network
-      - db-network
+      - prod-app-network
+      - prod-db-network
 
-  frontend:
-    build: ./frontend
+  frontend-prod:
+    build: ../../frontend
+    container_name: "pocket-pdfs-prod-frontend"
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
       - "3000:80"
     depends_on:
-      app:
+      app-prod:
         condition: service_healthy
     networks:
-      - app-network
+      - prod-app-network
 
 volumes:
-  pocket_pdfs_data:
+  pocket_pdfs_prod_data:
 
 networks:
-  app-network:
+  prod-db-network:
     driver: bridge
-  db-network:
+  prod-app-network:
     driver: bridge
