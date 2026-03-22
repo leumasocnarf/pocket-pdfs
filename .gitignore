@@ -16,3 +16,6 @@ out/
 ### Environment Variables
 infra/prod/.env
 infra/staging/.env
+
+# Infra Scripts Variables
+infra/.deploy.env

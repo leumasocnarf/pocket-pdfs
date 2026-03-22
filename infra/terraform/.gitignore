@@ -1,0 +1,14 @@
+# Local state — never commit
+terraform.tfstate
+terraform.tfstate.backup
+ 
+# Real variable values — never commit
+terraform.tfvars
+ 
+# Terraform working directory
+.terraform/
+.terraform.lock.hcl
+ 
+# Crash logs
+crash.log
+ 

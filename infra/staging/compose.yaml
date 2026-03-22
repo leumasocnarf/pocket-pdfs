@@ -22,7 +22,8 @@ services:
       - staging-db-network
 
   app-staging:
-    build: ../../backend
+    image: ${AWS_ECR}/pocket-pdfs/backend:staging
+    platform: linux/amd64
     container_name: "pocket-pdfs-staging-app"
     restart: unless-stopped
     ports:
@@ -45,7 +46,8 @@ services:
       - staging-db-network
 
   frontend-staging:
-    build: ../../frontend
+    image: ${AWS_ECR}/pocket-pdfs/frontend:staging
+    platform: linux/amd64
     container_name: "pocket-pdfs-staging-frontend"
     restart: unless-stopped
     volumes:
