@@ -52,3 +52,30 @@ output "ec2_ssh_command" {
   description = "SSH command to connect manually"
   value       = "ssh -i ~/.ssh/${var.key_pair_name}.pem ec2-user@${aws_eip.pocket_pdfs.public_ip}"
 }
+
+
+# -----------------------------------------------
+# GitHub Actions OIDC Role
+# -----------------------------------------------
+output "github_actions_role_arn" {
+  description = "IAM Role ARN — add as AWS_ROLE_ARN in GitHub Secrets"
+  value       = aws_iam_role.github_actions.arn
+}
+
+# -----------------------------------------------
+# GitHub Secrets summary — run after terraform apply
+# -----------------------------------------------
+output "github_secrets_summary" {
+  description = "All GitHub Secrets to set after terraform apply"
+  value       = <<-EOT
+    Set these in GitHub → Settings → Secrets → Actions:
+
+    EC2_HOST          = ${aws_eip.pocket_pdfs.public_ip}
+    EC2_SSH_KEY       = (contents of ~/.ssh/${var.key_pair_name}.pem)
+    AWS_ROLE_ARN      = ${aws_iam_role.github_actions.arn}
+    AWS_REGION        = ${var.aws_region}
+    ECR_REGISTRY      = ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com
+    ECR_BACKEND_REPO  = ${aws_ecr_repository.backend.name}
+    ECR_FRONTEND_REPO = ${aws_ecr_repository.frontend.name}
+  EOT
+}

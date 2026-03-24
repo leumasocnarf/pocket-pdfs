@@ -1,0 +1,64 @@
+name: Deploy Staging
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    name: Build and Deploy to Staging
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # required for OIDC
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # OIDC — no long-lived credentials needed
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push backend image
+        run: |
+          docker buildx build --platform linux/amd64 \
+            -t ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_BACKEND_REPO }}:staging \
+            --push ./backend
+
+      - name: Build and push frontend image
+        run: |
+          docker buildx build --platform linux/amd64 \
+            -t ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_FRONTEND_REPO }}:staging \
+            --push ./frontend
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/pocket-pdfs-key.pem
+          chmod 400 ~/.ssh/pocket-pdfs-key.pem
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy config files to EC2
+        run: |
+          scp -i ~/.ssh/pocket-pdfs-key.pem \
+            infra/staging/compose.yaml \
+            infra/staging/nginx.conf \
+            ec2-user@${{ secrets.EC2_HOST }}:/opt/pocket-pdfs/staging/
+
+      - name: Deploy on EC2
+        run: |
+          ssh -i ~/.ssh/pocket-pdfs-key.pem \
+            -o StrictHostKeyChecking=no \
+            ec2-user@${{ secrets.EC2_HOST }} \
+            "aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
+              | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }} \
+              && cd /opt/pocket-pdfs/staging \
+              && docker compose pull \
+              && docker compose up -d"
