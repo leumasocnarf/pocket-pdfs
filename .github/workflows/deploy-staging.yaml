@@ -69,6 +69,7 @@ jobs:
           ADMIN_PASSWORD=${{ secrets.STAGING_ADMIN_PASSWORD }}
           AWS_REGION=${{ secrets.AWS_REGION }}
           AWS_S3_BUCKET=${{ secrets.S3_BUCKET_NAME }}
+          AWS_S3_PREFIX=${{ secrets.STAGING_S3_PREFIX }} 
           AWS_ACCESS_KEY_ID=${{ secrets.APP_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY=${{ secrets.APP_AWS_SECRET_ACCESS_KEY }}
           AWS_ECR=${{ secrets.ECR_REGISTRY }}
