@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.pocketpdfs'
 version = '1.0.0'
-description = 'Backent project with Spring Boot'
+description = 'Backend project with Spring Boot'
 
 java {
 	toolchain {
