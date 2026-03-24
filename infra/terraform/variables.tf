@@ -33,3 +33,8 @@ variable "s3_bucket_name" {
   description = "Globally unique S3 bucket name for PDF storage"
   type        = string
 }
+
+variable "github_username" {
+  description = "Your GitHub username — used to restrict OIDC to your repo"
+  type        = string
+}
