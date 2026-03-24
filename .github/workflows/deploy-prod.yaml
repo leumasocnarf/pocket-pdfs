@@ -63,6 +63,7 @@ jobs:
           DB_HOST=postgres-prod
           DB_PORT=5432
           JWT_SECRET=${{ secrets.PROD_JWT_SECRET }}
+          JWT_EXPIRATION_MS=${{ secrets.PROD_JWT_EXPIRATION_MS }}
           ADMIN_USERNAME=${{ secrets.PROD_ADMIN_USERNAME }}
           ADMIN_PASSWORD=${{ secrets.PROD_ADMIN_PASSWORD }}
           AWS_REGION=${{ secrets.AWS_REGION }}

@@ -64,6 +64,7 @@ jobs:
           DB_HOST=postgres-staging
           DB_PORT=5432
           JWT_SECRET=${{ secrets.STAGING_JWT_SECRET }}
+          JWT_EXPIRATION_MS=${{ secrets.STAGING_JWT_EXPIRATION_MS }}
           ADMIN_USERNAME=${{ secrets.STAGING_ADMIN_USERNAME }}
           ADMIN_PASSWORD=${{ secrets.STAGING_ADMIN_PASSWORD }}
           AWS_REGION=${{ secrets.AWS_REGION }}
