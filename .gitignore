@@ -1,3 +1,21 @@
 # Ignore the .DS_Store file. This file is not needed in version control and can be safely ignored.
 .DS_Store
 
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### VS Code ###
+.vscode/
+
+### Environment Variables
+infra/prod/.env
+infra/staging/.env
+
+# Infra Scripts Variables
+infra/.deploy.env
