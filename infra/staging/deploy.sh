@@ -63,10 +63,13 @@ aws ecr get-login-password --region $REGION \
 
 echo "==> [3/6] Building and pushing staging images..."
 docker buildx build --platform linux/amd64 \
+  --secret id=sentry_auth_token,env=SENTRY_AUTH_TOKEN \
   -t $AWS_ECR/pocket-pdfs/backend:staging \
   --push "$(dirname "$0")/../../backend"
 
 docker buildx build --platform linux/amd64 \
+  --build-arg VITE_SENTRY_DSN=$VITE_SENTRY_DSN \
+  --build-arg VITE_ENVIRONMENT=staging \
   -t $AWS_ECR/pocket-pdfs/frontend:staging \
   --push "$(dirname "$0")/../../frontend"
 
