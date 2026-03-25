@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { FileResponse } from "../types.ts";
 import { getPreviewUrl } from "../api/files.ts";
 import "../styles/modal.css";
+import { captureApiError } from "../utils/sentry.ts";
 
 interface Props {
   file: FileResponse;
@@ -18,7 +19,8 @@ export default function PreviewModal({ file, onClose }: Props) {
       try {
         const data = await getPreviewUrl(file.id);
         setUrl(data.url);
-      } catch {
+      } catch (err: unknown) {
+        captureApiError(err, { fileId: file.id, filename: file.filename });
         setError("Could not load preview. Try downloading instead.");
       } finally {
         setLoading(false);

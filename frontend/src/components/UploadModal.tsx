@@ -3,6 +3,7 @@ import axios from "axios";
 import { uploadFile } from "../api/files.ts";
 import type { FileResponse } from "../types.ts";
 import "../styles/modal.css";
+import { captureApiError } from "../utils/sentry.ts";
 
 interface Props {
   onClose: () => void;
@@ -36,13 +37,12 @@ export default function UploadModal({ onClose, onSuccess }: Props) {
       const uploaded = await uploadFile(file);
       onSuccess(uploaded);
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError(
-          err.response?.data?.message ?? "Upload failed. Please try again.",
-        );
-      } else {
-        setError("An unexpected error occurred.");
-      }
+      captureApiError(err, { filename: file.name, fileSize: file.size });
+      setError(
+        axios.isAxiosError(err)
+          ? err.response?.data?.message ?? "Upload failed. Please try again."
+          : "An unexpected error occurred."
+      );
     } finally {
       setUploading(false);
     }
