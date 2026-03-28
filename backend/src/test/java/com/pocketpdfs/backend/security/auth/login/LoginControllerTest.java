@@ -45,7 +45,7 @@ class LoginControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static final String LOGIN_URL = "/auth/login";
+    private static final String LOGIN_URL = "/api/auth/login";
     private static final String TOKEN = "generated.jwt.token";
     private static final String USERNAME = "admin";
     private static final Instant EXPIRATION = Instant.now().plusSeconds(3600);

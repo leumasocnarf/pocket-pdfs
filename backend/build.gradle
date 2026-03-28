@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.pocketpdfs'
-version = '1.0.1'
+version = '1.0.2'
 description = 'Backend project with Spring Boot'
 
 java {
@@ -64,23 +64,4 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
-	testLogging {
-		events "failed", "skipped"
-		exceptionFormat "full"
-		showExceptions true
-		showCauses true
-		showStackTraces true
-		showStandardStreams false
-
-		afterSuite { desc, result ->
-			if (!desc.parent) {
-				println "\n--- Test Results ---"
-				println "Total:   ${result.testCount}"
-				println "Passed:  ${result.successfulTestCount}"
-				println "Failed:  ${result.failedTestCount}"
-				println "Skipped: ${result.skippedTestCount}"
-				println "--------------------\n"
-			}
-		}
-	}
 }

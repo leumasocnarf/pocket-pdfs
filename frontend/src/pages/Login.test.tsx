@@ -53,7 +53,7 @@ describe("Login page", () => {
     it("disables submit button and shows loading text while submitting", async () => {
       const user = userEvent.setup();
       server.use(
-        http.post("/auth/login", async () => {
+        http.post("/api/auth/login", async () => {
           await new Promise((r) => setTimeout(r, 100));
           return HttpResponse.json(mockLoginResponse);
         }),
@@ -74,7 +74,7 @@ describe("Login page", () => {
     it("stores token and navigates to home on success", async () => {
       const user = userEvent.setup();
       server.use(
-        http.post("/auth/login", () => HttpResponse.json(mockLoginResponse)),
+        http.post("/api/auth/login", () => HttpResponse.json(mockLoginResponse)),
       );
       renderLogin();
 
@@ -93,7 +93,7 @@ describe("Login page", () => {
     it("shows server error message on 401", async () => {
       const user = userEvent.setup();
       server.use(
-        http.post("/auth/login", () =>
+        http.post("/api/auth/login", () =>
           HttpResponse.json(
             { message: "Invalid username or password" },
             { status: 401 },
@@ -114,7 +114,7 @@ describe("Login page", () => {
     it("shows fallback message when server returns no message", async () => {
       const user = userEvent.setup();
       server.use(
-        http.post("/auth/login", () =>
+        http.post("/api/auth/login", () =>
           HttpResponse.json(null, { status: 401 }),
         ),
       );
@@ -146,7 +146,7 @@ describe("Login page", () => {
     it("clears previous error on new submission", async () => {
       const user = userEvent.setup();
       server.use(
-        http.post("/auth/login", () =>
+        http.post("/api/auth/login", () =>
           HttpResponse.json(null, { status: 401 }),
         ),
       );
@@ -158,7 +158,7 @@ describe("Login page", () => {
       await screen.findByText("Invalid username or password");
 
       server.use(
-        http.post("/auth/login", () => HttpResponse.json(mockLoginResponse)),
+        http.post("/api/auth/login", () => HttpResponse.json(mockLoginResponse)),
       );
       await user.click(screen.getByRole("button", { name: "Sign in" }));
 

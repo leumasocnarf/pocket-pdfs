@@ -12,6 +12,7 @@ on:
       - develop
     paths:
       - "backend/**"
+  workflow_call:    
 
 jobs:
   ci:
@@ -37,3 +38,29 @@ jobs:
 
       - name: Run tests
         run: ./gradlew test --no-daemon
+
+      - name: Publish test summary
+        if: always()
+        run: |
+          tests=0; failures=0; errors=0; skipped=0
+
+          for file in build/test-results/test/*.xml; do
+            tests=$((tests + $(grep -oP 'tests="\K[0-9]+' "$file" | head -1)))
+            failures=$((failures + $(grep -oP 'failures="\K[0-9]+' "$file" | head -1)))
+            errors=$((errors + $(grep -oP 'errors="\K[0-9]+' "$file" | head -1)))
+            skipped=$((skipped + $(grep -oP 'skipped="\K[0-9]+' "$file" | head -1)))
+          done
+
+          passed=$((tests - failures - errors - skipped))
+          total_files=$(ls build/test-results/test/*.xml | wc -l)
+
+          if [ "$failures" -gt 0 ] || [ "$errors" -gt 0 ]; then
+            status="❌ ${passed} passes · $((failures + errors)) failures"
+          else
+            status="✅ ${passed} passes"
+          fi
+
+          echo "## Backend Test Report" >> $GITHUB_STEP_SUMMARY
+          echo "### Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test Files:** ✅ ${total_files} total" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test Results:** ${status} · ${tests} total" >> $GITHUB_STEP_SUMMARY
