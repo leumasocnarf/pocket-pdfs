@@ -110,7 +110,7 @@ public class SecurityConfiguration {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers("/actuator/health").permitAll()
-                                .requestMatchers("/auth/login").permitAll()
+                                .requestMatchers("/api/auth/login").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class)
