@@ -12,6 +12,7 @@ on:
       - develop
     paths:
       - "frontend/**"
+  workflow_call:
 
 jobs:
   ci:
