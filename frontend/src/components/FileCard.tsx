@@ -1,6 +1,7 @@
 import type { FileResponse } from "../types.ts";
 import "../styles/filecard.css";
 import { getDownloadUrl } from "../api/files.ts";
+import { captureApiError } from "../utils/sentry.ts";
 
 interface Props {
   file: FileResponse;
@@ -27,8 +28,9 @@ export default function FileCard({ file, onDelete, onPreview }: Props) {
     try {
       const data = await getDownloadUrl(file.id);
       window.open(data.url, "_blank");
-    } catch {
-      console.error("Failed to get download URL");
+    } catch (err: unknown) {
+      captureApiError(err, { fileId: file.id, filename: file.filename });
+      alert("Failed to download file. Please try again.");
     }
   }
 

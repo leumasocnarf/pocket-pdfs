@@ -26,14 +26,19 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push backend image
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           docker buildx build --platform linux/amd64 \
+            --secret id=sentry_auth_token,env=SENTRY_AUTH_TOKEN \
             -t ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_BACKEND_REPO }}:staging \
             --push ./backend
 
       - name: Build and push frontend image
         run: |
           docker buildx build --platform linux/amd64 \
+            --build-arg VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONTEND }} \
+            --build-arg VITE_ENVIRONMENT=staging \
             -t ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_FRONTEND_REPO }}:staging \
             --push ./frontend
 
@@ -73,6 +78,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_ECR=${{ secrets.ECR_REGISTRY }}
           CORS_ALLOWED_ORIGINS=http://${{ secrets.EC2_HOST }}:3001
+          SPRING_SENTRY_DSN=${{ secrets.SENTRY_DSN_BACKEND }}
           ENVEOF"
 
       - name: Deploy on EC2
@@ -85,4 +91,4 @@ jobs:
               && cd /opt/pocket-pdfs/staging \
               && docker compose pull \
               && docker compose up -d"
-              
+

@@ -4,6 +4,7 @@ import axios from "axios";
 import { login } from "../api/auth.ts";
 import { setToken } from "../stores/token.store.ts";
 import "../styles/login.css";
+import { captureApiError } from "../utils/sentry.ts";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -22,11 +23,12 @@ export default function Login() {
       setToken(data.token);
       navigate("/");
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message ?? "Invalid username or password");
-      } else {
-        setError("An unexpected error occurred");
-      }
+      captureApiError(err, { username });
+      setError(
+        axios.isAxiosError(err)
+          ? err.response?.data?.message ?? "Invalid username or password"
+          : "An unexpected error occurred"
+      );
     } finally {
       setLoading(false);
     }

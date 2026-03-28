@@ -18,7 +18,8 @@ RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
 COPY src/ src/
 
 # Compile the application and skip tests
-RUN ./gradlew clean build -x test -x testClasses --no-daemon
+RUN --mount=type=secret,id=sentry_auth_token,env=SENTRY_AUTH_TOKEN \
+    ./gradlew clean build -x test -x testClasses --no-daemon
 
 # Run stage
 FROM eclipse-temurin:$JAVA_VERSION-jre-alpine

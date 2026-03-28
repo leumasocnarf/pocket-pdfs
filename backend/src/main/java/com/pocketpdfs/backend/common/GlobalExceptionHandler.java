@@ -1,5 +1,6 @@
 package com.pocketpdfs.backend.common;
 
+import io.sentry.Sentry;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -21,6 +22,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception e) {
         log.error("Unexpected error: {}", e.getMessage(), e);
+        Sentry.captureException(e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred"));
@@ -29,6 +31,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BackendApplicationException.class)
     public ResponseEntity<ErrorResponse> handleBackendException(BackendApplicationException e) {
         log.warn("Application error [{}]: {}", e.getStatus(), e.getMessage());
+        if (e.getStatus().is5xxServerError()) {
+            Sentry.captureException(e);
+        }
         return ResponseEntity
                 .status(e.getStatus())
                 .body(ErrorResponse.of(e.getStatus(), e.getMessage()));

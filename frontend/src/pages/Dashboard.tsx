@@ -7,6 +7,7 @@ import FileList from "../components/FileList.tsx";
 import PreviewModal from "../components/PreviewModal.tsx";
 import UploadModal from "../components/UploadModal.tsx";
 import "../styles/dashboard.css";
+import { captureApiError } from "../utils/sentry.ts";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -25,7 +26,8 @@ export default function Dashboard() {
       setLoading(true);
       const data = await listFiles();
       setFiles(data);
-    } catch {
+    } catch (err: unknown) {
+      captureApiError(err)
       setError("Failed to load files. Please try again.");
     } finally {
       setLoading(false);
@@ -37,7 +39,8 @@ export default function Dashboard() {
     try {
       await deleteFile(id);
       setFiles((prev) => prev.filter((f) => f.id !== id));
-    } catch {
+    } catch (err: unknown) {
+      captureApiError(err, { fileId: id});
       setError("Failed to delete file.");
     }
   }

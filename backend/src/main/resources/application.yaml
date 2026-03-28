@@ -32,3 +32,7 @@ management:
   endpoint:
     health:
       show-details: never
+
+sentry:
+  dsn: ${SPRING_SENTRY_DSN}
+  send-default-pii: true
