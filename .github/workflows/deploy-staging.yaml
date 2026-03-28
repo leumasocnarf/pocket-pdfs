@@ -35,7 +35,6 @@ jobs:
             --secret id=sentry_auth_token,env=SENTRY_AUTH_TOKEN \
             -t ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_BACKEND_REPO }}:staging \
             -t ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_BACKEND_REPO }}:${{ env.IMAGE_TAG }} \
-            --push ./backendCR_REGISTRY }}/${{ secrets.ECR_BACKEND_REPO }}:staging \
             --push ./backend
 
   build-frontend:
