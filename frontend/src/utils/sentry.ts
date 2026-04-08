@@ -1,9 +1,9 @@
-import axios from "axios";
 import * as Sentry from "@sentry/react";
+import { ApiError } from "../api/api";
 
 export function captureApiError(err: unknown, extra?: Record<string, unknown>) {
-  if (axios.isAxiosError(err)) {
-    if (err.response?.status && err.response.status >= 500) {
+  if (err instanceof ApiError) {
+    if (err.status >= 500) {
       Sentry.captureException(err, { extra });
     }
   } else {

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import axios from "axios";
+import { ApiError } from "../api/api";
 import UploadModal from "./UploadModal";
 import { uploadFile } from "../api/files";
 import type { FileResponse } from "../types";
@@ -9,17 +9,6 @@ import type { FileResponse } from "../types";
 vi.mock("../api/files", () => ({
   uploadFile: vi.fn(),
 }));
-
-vi.mock("axios", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("axios")>();
-  return {
-    ...actual,
-    default: {
-      ...actual.default,
-      isAxiosError: vi.fn(),
-    },
-  };
-});
 
 const mockFileResponse: FileResponse = {
   id: "file-123",
@@ -100,7 +89,7 @@ describe("UploadModal", () => {
 
   it("shows uploading state while the request is in flight", async () => {
     const user = userEvent.setup();
-    vi.mocked(uploadFile).mockReturnValue(new Promise(() => {})); // never resolves
+    vi.mocked(uploadFile).mockReturnValue(new Promise(() => {}));
     render(<UploadModal onClose={onClose} onSuccess={onSuccess} />);
 
     const input = document.querySelector(
@@ -113,12 +102,11 @@ describe("UploadModal", () => {
     expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
   });
 
-  it("shows the server error message on a known axios error", async () => {
+  it("shows the server error message on an ApiError with JSON body", async () => {
     const user = userEvent.setup();
-    vi.mocked(axios.isAxiosError).mockReturnValue(true);
-    vi.mocked(uploadFile).mockRejectedValueOnce({
-      response: { data: { message: "File too large." } },
-    });
+    vi.mocked(uploadFile).mockRejectedValueOnce(
+      new ApiError(422, JSON.stringify({ message: "File too large." })),
+    );
     render(<UploadModal onClose={onClose} onSuccess={onSuccess} />);
 
     const input = document.querySelector(
@@ -132,10 +120,11 @@ describe("UploadModal", () => {
     });
   });
 
-  it("shows a fallback axios error when response has no message", async () => {
+  it("shows a fallback error when ApiError body has no message", async () => {
     const user = userEvent.setup();
-    vi.mocked(axios.isAxiosError).mockReturnValue(true);
-    vi.mocked(uploadFile).mockRejectedValueOnce({ response: { data: {} } });
+    vi.mocked(uploadFile).mockRejectedValueOnce(
+      new ApiError(422, JSON.stringify({})),
+    );
     render(<UploadModal onClose={onClose} onSuccess={onSuccess} />);
 
     const input = document.querySelector(
@@ -153,7 +142,6 @@ describe("UploadModal", () => {
 
   it("shows a generic error message on an unexpected error", async () => {
     const user = userEvent.setup();
-    vi.mocked(axios.isAxiosError).mockReturnValue(false);
     vi.mocked(uploadFile).mockRejectedValueOnce(new Error("Unexpected"));
     render(<UploadModal onClose={onClose} onSuccess={onSuccess} />);
 
