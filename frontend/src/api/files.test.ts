@@ -7,13 +7,23 @@ import {
   getDownloadUrl,
   deleteFile,
 } from "./files.ts";
-import type { FileResponse, UrlResponse, ApiError } from "../types.ts";
+import type { FileResponse, UrlResponse } from "../types.ts";
+import { ApiError } from "./api.ts";
 
 vi.mock("./api.ts", () => ({
   default: {
     get: vi.fn(),
     post: vi.fn(),
     delete: vi.fn(),
+  },
+  ApiError: class ApiError extends Error {
+    status: number;
+    body: string;
+    constructor(status: number, body: string) {
+      super(`Request failed: ${status}`);
+      this.status = status;
+      this.body = body;
+    }
   },
 }));
 
@@ -35,13 +45,6 @@ const mockUrlResponse: UrlResponse = {
   url: "https://storage.example.com/signed-url",
 };
 
-const mockApiError: ApiError = {
-  status: 404,
-  error: "Not Found",
-  message: "The requested file does not exist",
-  timestamp: "2024-01-01T00:00:00Z",
-};
-
 describe("files api", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -49,7 +52,7 @@ describe("files api", () => {
 
   describe("listFiles", () => {
     it("calls GET /files and returns data", async () => {
-      mockedGet.mockResolvedValueOnce({ data: [mockFile] });
+      mockedGet.mockResolvedValueOnce([mockFile]);
 
       const result = await listFiles();
 
@@ -59,7 +62,7 @@ describe("files api", () => {
     });
 
     it("returns an empty array when there are no files", async () => {
-      mockedGet.mockResolvedValueOnce({ data: [] });
+      mockedGet.mockResolvedValueOnce([]);
 
       const result = await listFiles();
 
@@ -67,18 +70,17 @@ describe("files api", () => {
     });
 
     it("throws when the request fails", async () => {
-      mockedGet.mockRejectedValueOnce(mockApiError);
+      mockedGet.mockRejectedValueOnce(
+        new ApiError(404, JSON.stringify({ error: "Not Found" })),
+      );
 
-      await expect(listFiles()).rejects.toMatchObject({
-        status: 404,
-        error: "Not Found",
-      });
+      await expect(listFiles()).rejects.toBeInstanceOf(ApiError);
     });
   });
 
   describe("uploadFile", () => {
-    it("calls POST /files/upload with correct FormData and headers", async () => {
-      mockedPost.mockResolvedValueOnce({ data: mockFile });
+    it("calls POST /files/upload with FormData", async () => {
+      mockedPost.mockResolvedValueOnce(mockFile);
       const file = new File(["content"], "document.pdf", {
         type: "application/pdf",
       });
@@ -86,18 +88,15 @@ describe("files api", () => {
       const result = await uploadFile(file);
 
       expect(mockedPost).toHaveBeenCalledOnce();
-      const [url, body, config] = mockedPost.mock.calls[0];
+      const [url, body] = mockedPost.mock.calls[0];
       expect(url).toBe("/files/upload");
       expect(body).toBeInstanceOf(FormData);
       expect(body.get("file")).toBe(file);
-      expect(config).toEqual({
-        headers: { "Content-Type": "multipart/form-data" },
-      });
       expect(result).toEqual(mockFile);
     });
 
     it("returns a FileResponse with correct shape on success", async () => {
-      mockedPost.mockResolvedValueOnce({ data: mockFile });
+      mockedPost.mockResolvedValueOnce(mockFile);
       const file = new File(["content"], "document.pdf", {
         type: "application/pdf",
       });
@@ -114,21 +113,20 @@ describe("files api", () => {
     });
 
     it("throws when the upload fails", async () => {
-      mockedPost.mockRejectedValueOnce(mockApiError);
+      mockedPost.mockRejectedValueOnce(
+        new ApiError(413, JSON.stringify({ error: "File too large" })),
+      );
       const file = new File(["content"], "document.pdf", {
         type: "application/pdf",
       });
 
-      await expect(uploadFile(file)).rejects.toMatchObject({
-        status: 404,
-        error: "Not Found",
-      });
+      await expect(uploadFile(file)).rejects.toBeInstanceOf(ApiError);
     });
   });
 
   describe("getPreviewUrl", () => {
     it("calls GET /files/:id/preview and returns a UrlResponse", async () => {
-      mockedGet.mockResolvedValueOnce({ data: mockUrlResponse });
+      mockedGet.mockResolvedValueOnce(mockUrlResponse);
 
       const result = await getPreviewUrl("file-123");
 
@@ -137,7 +135,7 @@ describe("files api", () => {
     });
 
     it("returned url response has correct shape", async () => {
-      mockedGet.mockResolvedValueOnce({ data: mockUrlResponse });
+      mockedGet.mockResolvedValueOnce(mockUrlResponse);
 
       const result = await getPreviewUrl("file-123");
 
@@ -149,18 +147,19 @@ describe("files api", () => {
     });
 
     it("throws when the file is not found", async () => {
-      mockedGet.mockRejectedValueOnce(mockApiError);
+      mockedGet.mockRejectedValueOnce(
+        new ApiError(404, JSON.stringify({ error: "Not Found" })),
+      );
 
-      await expect(getPreviewUrl("nonexistent")).rejects.toMatchObject({
-        status: 404,
-        error: "Not Found",
-      });
+      await expect(getPreviewUrl("nonexistent")).rejects.toBeInstanceOf(
+        ApiError,
+      );
     });
   });
 
   describe("getDownloadUrl", () => {
     it("calls GET /files/:id/download and returns a UrlResponse", async () => {
-      mockedGet.mockResolvedValueOnce({ data: mockUrlResponse });
+      mockedGet.mockResolvedValueOnce(mockUrlResponse);
 
       const result = await getDownloadUrl("file-123");
 
@@ -169,7 +168,7 @@ describe("files api", () => {
     });
 
     it("returned url response has correct shape", async () => {
-      mockedGet.mockResolvedValueOnce({ data: mockUrlResponse });
+      mockedGet.mockResolvedValueOnce(mockUrlResponse);
 
       const result = await getDownloadUrl("file-123");
 
@@ -181,18 +180,19 @@ describe("files api", () => {
     });
 
     it("throws when the file is not found", async () => {
-      mockedGet.mockRejectedValueOnce(mockApiError);
+      mockedGet.mockRejectedValueOnce(
+        new ApiError(404, JSON.stringify({ error: "Not Found" })),
+      );
 
-      await expect(getDownloadUrl("nonexistent")).rejects.toMatchObject({
-        status: 404,
-        error: "Not Found",
-      });
+      await expect(getDownloadUrl("nonexistent")).rejects.toBeInstanceOf(
+        ApiError,
+      );
     });
   });
 
   describe("deleteFile", () => {
     it("calls DELETE /files/:id", async () => {
-      mockedDelete.mockResolvedValueOnce({ data: undefined });
+      mockedDelete.mockResolvedValueOnce(undefined);
 
       await deleteFile("file-123");
 
@@ -201,7 +201,7 @@ describe("files api", () => {
     });
 
     it("returns void on success", async () => {
-      mockedDelete.mockResolvedValueOnce({ data: undefined });
+      mockedDelete.mockResolvedValueOnce(undefined);
 
       const result = await deleteFile("file-123");
 
@@ -209,18 +209,14 @@ describe("files api", () => {
     });
 
     it("throws when delete is forbidden", async () => {
-      const forbiddenError: ApiError = {
-        status: 403,
-        error: "Forbidden",
-        message: "You do not have permission to delete this file",
-        timestamp: "2024-01-01T00:00:00Z",
-      };
-      mockedDelete.mockRejectedValueOnce(forbiddenError);
+      mockedDelete.mockRejectedValueOnce(
+        new ApiError(403, JSON.stringify({ error: "Forbidden" })),
+      );
 
-      await expect(deleteFile("file-123")).rejects.toMatchObject({
-        status: 403,
-        error: "Forbidden",
-      });
+      const error = await deleteFile("file-123").catch((e) => e);
+
+      expect(error).toBeInstanceOf(ApiError);
+      expect((error as ApiError).status).toBe(403);
     });
   });
 });

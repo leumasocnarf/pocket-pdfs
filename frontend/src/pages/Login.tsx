@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import axios from "axios";
 import { login } from "../api/auth.ts";
 import { setToken } from "../stores/token.store.ts";
 import "../styles/login.css";
 import { captureApiError } from "../utils/sentry.ts";
+import { getApiErrorMessage } from "../api/api.ts";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -17,18 +17,13 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
       const data = await login(username, password);
       setToken(data.token);
       navigate("/");
     } catch (err: unknown) {
       captureApiError(err, { username });
-      setError(
-        axios.isAxiosError(err)
-          ? err.response?.data?.message ?? "Invalid username or password"
-          : "An unexpected error occurred"
-      );
+      setError(getApiErrorMessage(err, "Invalid username or password"));
     } finally {
       setLoading(false);
     }

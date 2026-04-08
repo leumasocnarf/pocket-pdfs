@@ -1,13 +1,13 @@
-import axios from "axios";
 import type { LoginResponse } from "../types";
+import api from "./api";
 
 export async function login(
   username: string,
   password: string,
 ): Promise<LoginResponse> {
-  const response = await axios.post<LoginResponse>("/api/auth/login", {
-    username,
-    password,
-  });
-  return response.data;
+  return api.postJson<LoginResponse>(
+    "/auth/login",
+    { username, password },
+    { skipAuth: true },
+  );
 }

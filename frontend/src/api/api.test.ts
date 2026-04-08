@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { http, HttpResponse } from "msw";
 import { server } from "../test/msw-server";
 import { getToken, clearToken } from "../stores/token.store";
-import api from "./api";
+import api, { ApiError } from "./api";
 
 vi.mock("../stores/token.store", () => ({
   getToken: vi.fn(),
@@ -22,10 +22,11 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const pathname = () => new URL(window.location.href, "http://localhost").pathname;
+const pathname = () =>
+  new URL(window.location.href, "http://localhost").pathname;
 
-describe("api interceptors", () => {
-  describe("request interceptor", () => {
+describe("api", () => {
+  describe("auth header", () => {
     it("attaches Authorization header when token exists", async () => {
       vi.mocked(getToken).mockReturnValue("test-token");
       let authHeader: string | null = null;
@@ -37,6 +38,7 @@ describe("api interceptors", () => {
       );
 
       await api.get("/ping");
+
       expect(authHeader).toBe("Bearer test-token");
     });
 
@@ -51,19 +53,21 @@ describe("api interceptors", () => {
       );
 
       await api.get("/ping");
+
       expect(authHeader).toBeNull();
     });
   });
 
-  describe("response interceptor", () => {
-    it("passes through successful responses", async () => {
+  describe("response handling", () => {
+    it("returns parsed JSON for successful responses", async () => {
       vi.mocked(getToken).mockReturnValue(null);
       server.use(
         http.get("/api/ping", () => HttpResponse.json({ data: "ok" })),
       );
 
       const res = await api.get("/ping");
-      expect(res.data).toEqual({ data: "ok" });
+
+      expect(res).toEqual({ data: "ok" });
     });
 
     it("clears token and redirects to /login on 401", async () => {
@@ -72,20 +76,22 @@ describe("api interceptors", () => {
         http.get("/api/ping", () => HttpResponse.json(null, { status: 401 })),
       );
 
-      await expect(api.get("/ping")).rejects.toThrow();
+      await expect(api.get("/ping")).rejects.toThrow(ApiError);
 
       expect(clearToken).toHaveBeenCalledOnce();
       expect(pathname()).toBe("/login");
     });
 
-    it("rejects without clearing token on non-401 errors", async () => {
+    it("rejects with ApiError without clearing token on non-401 errors", async () => {
       vi.mocked(getToken).mockReturnValue("valid-token");
       server.use(
         http.get("/api/ping", () => HttpResponse.json(null, { status: 500 })),
       );
 
-      await expect(api.get("/ping")).rejects.toThrow();
+      const error = await api.get("/ping").catch((e) => e);
 
+      expect(error).toBeInstanceOf(ApiError);
+      expect((error as ApiError).status).toBe(500);
       expect(clearToken).not.toHaveBeenCalled();
       expect(pathname()).toBe("/");
     });

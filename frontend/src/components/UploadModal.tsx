@@ -1,9 +1,9 @@
 import { useState, useRef, type ChangeEvent } from "react";
-import axios from "axios";
 import { uploadFile } from "../api/files.ts";
 import type { FileResponse } from "../types.ts";
 import "../styles/modal.css";
 import { captureApiError } from "../utils/sentry.ts";
+import { getApiErrorMessage } from "../api/api.ts";
 
 interface Props {
   onClose: () => void;
@@ -38,11 +38,7 @@ export default function UploadModal({ onClose, onSuccess }: Props) {
       onSuccess(uploaded);
     } catch (err: unknown) {
       captureApiError(err, { filename: file.name, fileSize: file.size });
-      setError(
-        axios.isAxiosError(err)
-          ? err.response?.data?.message ?? "Upload failed. Please try again."
-          : "An unexpected error occurred."
-      );
+      setError(getApiErrorMessage(err, "Upload failed. Please try again."));
     } finally {
       setUploading(false);
     }

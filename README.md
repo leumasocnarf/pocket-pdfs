@@ -10,7 +10,7 @@ Pocket PDFs is a fullstack web application that lets users securely upload, prev
 | Layer          | Technology                                          |
 | -------------- | --------------------------------------------------- |
 | Backend        | Java 25 · Spring Boot · Spring Security · Gradle    |
-| Frontend       | React · TypeScript · Vite · Axios · Bun             |
+| Frontend       | React · TypeScript · Vite · Bun                     |
 | Storage        | AWS S3 · PostgreSQL 18                              |
 | Infrastructure | AWS EC2 · ECR · Terraform · Docker · Nginx          |
 | CI/CD          | GitHub Actions                                      |

@@ -15,6 +15,7 @@ vi.mock("react-router", () => ({
 
 vi.mock("../stores/token.store", () => ({
   setToken: vi.fn(),
+  getToken: vi.fn(() => null),
 }));
 
 const mockLoginResponse = { token: "jwt-token" };
@@ -139,7 +140,7 @@ describe("Login page", () => {
       await user.click(screen.getByRole("button", { name: "Sign in" }));
 
       expect(
-        await screen.findByText("An unexpected error occurred"),
+        await screen.findByText("An unexpected error occurred."),
       ).toBeInTheDocument();
     });
 
