@@ -3,16 +3,18 @@
 ![Backend CI](https://github.com/leumasocnarf/pocket-pdfs/actions/workflows/backend-ci.yaml/badge.svg)
 ![Frontend CI](https://github.com/leumasocnarf/pocket-pdfs/actions/workflows/frontend-ci.yaml/badge.svg)
 
-Pocket PDFs is a fullstack web application that lets users securely upload, preview, download, and manage PDF files in the cloud.
+Pocket PDFs is a fullstack web application that lets users securely upload, preview, download, and manage PDF files in
+the cloud.
 
 ## Tech Stack
 
 | Layer          | Technology                                          |
-| -------------- | --------------------------------------------------- |
+|----------------|-----------------------------------------------------|
 | Backend        | Java 25 · Spring Boot · Spring Security · Gradle    |
 | Frontend       | React · TypeScript · Vite · Bun                     |
 | Storage        | AWS S3 · PostgreSQL 18                              |
 | Infrastructure | AWS EC2 · ECR · Terraform · Docker · Nginx          |
+| Migrations     | Liquibase                                           |
 | CI/CD          | GitHub Actions                                      |
 | Auth           | JWT (JSON Web Tokens)                               |
 | Monitoring     | Sentry                                              |
@@ -45,7 +47,8 @@ cd pocket-pdfs
 cp .env.example .env
 ```
 
-Open `.env` and configure each variable (see the [Environment Variables](#environment-variables) table below). These values are injected into the backend and frontend containers through Docker Compose.
+Open `.env` and configure each variable (see the [Environment Variables](#environment-variables) table below). These
+values are injected into the backend and frontend containers through Docker Compose.
 
 For the deploy script, also configure `.deploy.env`:
 
@@ -69,12 +72,13 @@ This spins up the backend, frontend, and Nginx reverse proxy together.
 
 ## Environment Variables
 
-Environment variables are injected into the containers through Docker Compose. Copy `.env.example` to `.env` at the project root and fill in your values.
+Environment variables are injected into the containers through Docker Compose. Copy `.env.example` to `.env` at the
+project root and fill in your values.
 
 ### `.env` — Application config (used by Docker Compose)
 
 | Variable            | Description                            | Example                                            |
-| ------------------- | -------------------------------------- | -------------------------------------------------- |
+|---------------------|----------------------------------------|----------------------------------------------------|
 | `DB_NAME`           | PostgreSQL database name               | `your-staging-db`                                  |
 | `DB_HOST`           | Database host (Docker service name)    | `postgres-staging`                                 |
 | `DB_USERNAME`       | Database user                          | `your-staging-user`                                |
@@ -94,7 +98,7 @@ Environment variables are injected into the containers through Docker Compose. C
 ### `.deploy.env` — Deployment config (used by deploy scripts)
 
 | Variable            | Description                            | Example                     |
-| ------------------- | -------------------------------------- | --------------------------- |
+|---------------------|----------------------------------------|-----------------------------|
 | `KEY_PATH`          | Path to SSH private key for EC2 access | `~/.ssh/your-key.pem`       |
 | `REGION`            | AWS region for deployment              | `us-east-1`                 |
 | `EC2_USER`          | SSH user on the EC2 instance           | `your-ec2-user`             |
@@ -123,25 +127,30 @@ The frontend uses **Vitest** as the test runner and **MSW** (Mock Service Worker
 
 ## CI/CD Pipeline
 
-The project uses **GitHub Actions** with four workflows and follows a **two-branch strategy**: `develop` for staging and `main` for production.
+The project uses **GitHub Actions** with four workflows and follows a **two-branch strategy**: `develop` for staging and
+`main` for production.
 
 | Workflow              | Trigger                                                       | Purpose                                                    |
-| --------------------- | ------------------------------------------------------------- | ---------------------------------------------------------- |
+|-----------------------|---------------------------------------------------------------|------------------------------------------------------------|
 | `backend-ci.yaml`     | Push to `main` or PR to `main`/`develop` (only `backend/**`)  | Build and test the Spring Boot backend                     |
 | `frontend-ci.yaml`    | Push to `main` or PR to `main`/`develop` (only `frontend/**`) | Install dependencies, lint, and test the React app         |
 | `deploy-staging.yaml` | Push to `develop`                                             | Build Docker images, push to ECR, deploy to staging EC2    |
 | `deploy-prod.yaml`    | Push to `main`                                                | Build Docker images, push to ECR, deploy to production EC2 |
 
-- **CI workflows are path-scoped.** Changes to `backend/` only trigger the backend CI, and changes to `frontend/` only trigger the frontend CI. This avoids wasting runner minutes on unchanged code.
-- **Staging deploys from `develop`, production deploys from `main`.** The typical flow is: open a PR against `develop` → CI runs → merge → staging deploy triggers automatically → once validated, merge `develop` into `main` → production deploy triggers automatically.
-- **GitHub authenticates with AWS through OIDC federation** — no long-lived AWS credentials are stored as repository secrets. The trust relationship is defined in `infra/terraform/oidc.tf`.
+- **CI workflows are path-scoped.** Changes to `backend/` only trigger the backend CI, and changes to `frontend/` only
+  trigger the frontend CI. This avoids wasting runner minutes on unchanged code.
+- **Staging deploys from `develop`, production deploys from `main`.** The typical flow is: open a PR against `develop` →
+  CI runs → merge → staging deploy triggers automatically → once validated, merge `develop` into `main` → production
+  deploy triggers automatically.
+- **GitHub authenticates with AWS through OIDC federation** — no long-lived AWS credentials are stored as repository
+  secrets. The trust relationship is defined in `infra/terraform/oidc.tf`.
 
 ## Infrastructure
 
 All AWS resources are provisioned with **Terraform** and defined in `infra/terraform/`:
 
 | Resource | File      | Purpose                                        |
-| -------- | --------- | ---------------------------------------------- |
+|----------|-----------|------------------------------------------------|
 | EC2      | `ec2.tf`  | Hosts the Docker Compose application stack     |
 | ECR      | `ecr.tf`  | Container registry for backend/frontend images |
 | S3       | `s3.tf`   | Stores uploaded PDF files                      |
@@ -160,8 +169,11 @@ terraform apply
 
 ### Deploying
 
-Staging and production each have their own `compose.yaml`, `nginx.conf`, and `deploy.sh` inside `infra/staging/` and `infra/prod/` respectively. The deploy scripts pull the latest images from ECR and restart the containers without Github Actions.
+Staging and production each have their own `compose.yaml`, `nginx.conf`, and `deploy.sh` inside `infra/staging/` and
+`infra/prod/` respectively. The deploy scripts pull the latest images from ECR and restart the containers without Github
+Actions.
 
 ## Monitoring
 
-**Sentry** is integrated in both the backend and the frontend to capture unhandled exceptions and errors in real time. Configure the `SENTRY_DSN` (backend) and `VITE_SENTRY_DSN` (frontend) environment variables to enable it.
+**Sentry** is integrated in both the backend and the frontend to capture unhandled exceptions and errors in real time.
+Configure the `SENTRY_DSN` (backend) and `VITE_SENTRY_DSN` (frontend) environment variables to enable it.
